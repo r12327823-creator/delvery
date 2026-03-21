@@ -6,11 +6,10 @@
   "scripts": {
     "start": "node server/index.js",
     "server": "node server/index.js",
-    "client": "npm run start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "install:all": "npm install && cd client && npm install",
-    "build": "cd client && npm install && npm run build",
-    "postinstall": "npm run install:all"
+    "client": "npm run start --prefix client",
+    "install:client": "cd client && npm install",
+    "build": "cd client && npm install && npm run build"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

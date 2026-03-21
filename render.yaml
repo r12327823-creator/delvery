@@ -1,0 +1,38 @@
+# render.yaml - Auto-deploy configuration for Render
+# Learn more: https://render.com/docs/yaml-spec
+
+services:
+  - type: web
+    name: market2home-api
+    env: node
+    region: singapore
+    plan: free
+    rootDir: .
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_NAME
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PLATFORM_COMMISSION
+        value: "10"
+      - key: DELIVERY_FEE
+        value: "40"
+      - key: RIDER_PAY_PER_DELIVERY
+        value: "30"
+      - key: FRONTEND_URL
+        sync: false

@@ -2,136 +2,123 @@
 
 ## Prerequisites
 - Push your code to a **GitHub repository**
-- Free account on [render.com](https://render.com)
+- Free accounts on [render.com](https://render.com) and [vercel.com](https://vercel.com)
 
 ---
 
-## Step 1: Provision PostgreSQL on Render
+## Step 1: Create PostgreSQL Database
 
 1. Go to [dashboard.render.com](https://dashboard.render.com)
 2. Click **"New +"** → **"PostgreSQL"**
-3. Give it a name: `market2home-db`
-4. Select **Free** plan
-5. Copy the **"Internal Connection String"** (you'll need this in Step 3)
+3. Name it: `market2home-db`
+4. Select **Free** plan → **Create Database**
+5. **Keep this tab open** — you'll need the connection string
 
 ---
 
-## Step 2: Deploy Backend API
+## Step 2: Deploy Backend on Render
 
+### Option A: Blueprint (Easiest)
 1. Go to [dashboard.render.com](https://dashboard.render.com)
-2. Click **"New +"** → **"Web Service"**
-3. Connect your **GitHub repo**
-4. Configure the service:
+2. Click **"New +"** → **"Blueprint"**
+3. Connect your GitHub repo
+4. Render detects `render.yaml` automatically → Click **"Apply"**
+5. Fill in these environment variables:
+   - `DB_HOST` — from Step 1 PostgreSQL connection string
+   - `DB_NAME` — from Step 1
+   - `DB_USER` — from Step 1
+   - `DB_PASSWORD` — from Step 1
+   - `FRONTEND_URL` — leave empty for now
 
-| Setting | Value |
-|---------|-------|
-| **Name** | `market2home-api` |
-| **Region** | Singapore (closest to India) |
-| **Branch** | `main` |
-| **Root Directory** | (leave empty) |
-| **Runtime** | `Node` |
-| **Build Command** | `npm install` |
-| **Start Command** | `npm start` |
-| **Instance Type** | `Free` |
-
-5. Click **"Create Web Service"**
-
----
-
-## Step 3: Add Environment Variables
-
-In the Render dashboard → **Environment** tab, add these variables:
-
-```
-NODE_ENV = production
-PORT = 10000
-
-# Database (from Step 1)
-DB_HOST = your-postgres-host
-DB_PORT = 5432
-DB_NAME = market2home_db
-DB_USER = your-postgres-user
-DB_PASSWORD = your-postgres-password
-
-# JWT - generate a random secret
-JWT_SECRET = your-super-secret-jwt-key-change-this
-
-# Platform Settings
-PLATFORM_COMMISSION = 10
-DELIVERY_FEE = 40
-RIDER_PAY_PER_DELIVERY = 30
-
-# Frontend URL (for CORS - update after deploying frontend)
-FRONTEND_URL = https://your-app.vercel.app
-```
+### Option B: Manual
+1. Dashboard → **"New +"** → **"Web Service"**
+2. Connect GitHub repo
+3. Settings:
+   - **Name**: `market2home-api`
+   - **Region**: Singapore
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+   - **Instance Type**: Free
+4. Add same environment variables as above
 
 ---
 
-## Step 4: Run Database Schema
+## Step 3: Run Database Schema
 
-1. Go to your PostgreSQL instance in Render
+1. Go to your PostgreSQL in Render dashboard
 2. Click **"Connect"** → **"PSQL Command"**
-3. Or use **pgAdmin / DBeaver** to connect with the connection string
-4. Copy and paste the contents of `server/config/schema.sql`
+3. Copy and paste the contents of `server/config/schema.sql`
+4. Press **Enter**
 
 ---
 
-## Step 5: Deploy Frontend (Vercel)
+## Step 4: Deploy Frontend on Vercel
+
+The React app is in `/client`. **You must tell Vercel to use that folder:**
 
 1. Go to [vercel.com](https://vercel.com)
-2. Import your GitHub repo
-3. Set **Root Directory** to `client`
-4. Add environment variable:
+2. **Import** your GitHub repo
+3. **Before clicking Deploy**, click **"Edit"** on the root directory
+4. Change `/` to `client`
+5. Click **Deploy**
+6. After deploy → **Settings** → **Environment Variables** → Add:
 
 ```
 REACT_APP_API_URL = https://market2home-api.onrender.com
 ```
 
-5. Deploy
-
-6. After deployment, go back to **Render Dashboard** → Web Service → Environment
-7. Update `FRONTEND_URL` with your Vercel URL (e.g., `https://market2home.vercel.app`)
+7. **Redeploy** — Deployments → last deploy → three dots → Redeploy
+8. Copy your Vercel URL
 
 ---
 
-## Step 6: Test Everything
+## Step 5: Update CORS on Render
 
-Your live URLs will be:
-- **Frontend**: `https://your-app.vercel.app`
-- **API**: `https://market2home-api.onrender.com`
-- **Admin**: `https://your-app.vercel.app/admin` → Login with mobile `9999999999`
+1. Render Dashboard → your web service → **Environment**
+2. Add:
 
----
-
-## Important Notes
-
-### Free Tier Limits (Render)
-- Web service sleeps after **15 minutes** of inactivity
-- First request after sleep takes ~30 seconds to wake up
-- PostgreSQL free tier: **1 database, 1GB storage**
-- Good enough for MVP with low traffic
-
-### For Production (when you grow)
-- Upgrade to Render **Starter** plan ($7/month) for no sleep
-- Or use **Railway** ($5/month credit)
-
-### Database
-- Render's free PostgreSQL sleeps after 90 days of inactivity
-- Keep the service active by making occasional API calls
-- Or switch to **Supabase** (no sleep on free tier)
+```
+FRONTEND_URL = https://your-vercel-app.vercel.app
+```
 
 ---
 
-## Troubleshooting
+## Step 6: Test
 
-**CORS errors?**
-- Make sure `FRONTEND_URL` is set correctly in Render
-- Both http:// and https:// variants might be needed
+| What | URL |
+|------|-----|
+| Frontend | `https://your-app.vercel.app` |
+| Customer Portal | `https://your-app.vercel.app/customer` |
+| Admin | `https://your-app.vercel.app/admin` → Login: `9999999999` |
 
-**Database connection failed?**
-- Check connection string format: `postgres://user:password@host:5432/dbname`
-- Make sure Render's IP allowlist includes your requests
+---
 
-**API returning 500?**
-- Check Render logs (click on the web service → Logs tab)
-- Most common: missing environment variables
+## Common Problems
+
+### Deploy stuck on Vercel
+- Make sure root directory is set to `client` (not `/`)
+- After adding `REACT_APP_API_URL`, you MUST redeploy
+
+### Deploy stuck on Render
+- Check the **Logs** tab for errors
+- Most common: missing `DB_PASSWORD` or wrong `DB_HOST`
+- Make sure PostgreSQL is fully created first
+
+### CORS errors
+- `FRONTEND_URL` must be set on Render with exact `https://` URL
+- No trailing slash
+
+### Free tier sleeps
+- Render free: 15 min sleep → 30s wakeup (normal)
+- PostgreSQL 90-day sleep → visit dashboard monthly
+
+---
+
+## Deployment Files
+
+```
+render.yaml       ← Auto-configures Render
+client/vercel.json ← Vercel build config
+server/index.js  ← CORS configured for production
+.gitignore       ← Keeps secrets out of GitHub
+```
