@@ -87,7 +87,7 @@ export default function CustomerCart() {
             fontWeight: 600,
           }}
         >
-          Browse Shops
+          Search for items
         </button>
       </div>
     );

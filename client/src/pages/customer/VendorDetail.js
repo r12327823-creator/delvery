@@ -128,9 +128,7 @@ export default function CustomerVendorDetail() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 16, fontWeight: 700, color: '#2563eb' }}>₹{product.price}</span>
 
-                  {product.stock_status === 'out_of_stock' ? (
-                    <span style={{ color: '#ef4444', fontSize: 12, fontWeight: 600 }}>Out of Stock</span>
-                  ) : qty === 0 ? (
+                  {qty === 0 ? (
                     <button
                       onClick={() => addToCart(product)}
                       style={{

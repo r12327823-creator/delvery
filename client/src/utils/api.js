@@ -40,6 +40,7 @@ export const api = {
   },
   getVendor: (id) => request(`/customer/vendors/${id}`),
   searchProducts: (q, pincode) => request(`/customer/search?q=${encodeURIComponent(q)}&pincode=${pincode}`),
+  getPopularProducts: (pincode) => request(`/customer/popular${pincode ? '?pincode=' + pincode : ''}`),
   placeOrder: (data) => request('/customer/orders', { method: 'POST', body: JSON.stringify(data) }),
   getOrders: (status) => request(`/customer/orders${status ? '?status=' + status : ''}`),
   getOrder: (id) => request(`/customer/orders/${id}`),

@@ -9,6 +9,7 @@ import CustomerLogin from './pages/customer/Login';
 import CustomerRegister from './pages/customer/Register';
 import CustomerVendors from './pages/customer/Vendors';
 import CustomerVendorDetail from './pages/customer/VendorDetail';
+import CustomerSearch from './pages/customer/Search';
 import CustomerCart from './pages/customer/Cart';
 import CustomerOrders from './pages/customer/Orders';
 import CustomerTrackOrder from './pages/customer/TrackOrder';
@@ -82,6 +83,7 @@ function App() {
             <Route index element={<CustomerHome />} />
             <Route path="login" element={<PublicRoute><CustomerLogin /></PublicRoute>} />
             <Route path="register" element={<PublicRoute><CustomerRegister /></PublicRoute>} />
+            <Route path="search" element={<CustomerSearch />} />
             <Route path="vendors" element={<CustomerVendors />} />
             <Route path="vendor/:id" element={<CustomerVendorDetail />} />
             <Route path="cart" element={<CustomerCart />} />

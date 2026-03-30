@@ -8,7 +8,7 @@ const portalConfig = {
     color: '#2563eb',
     nav: [
       { label: 'Home', path: '/customer' },
-      { label: 'Vendors', path: '/customer/vendors' },
+      { label: 'Search', path: '/customer/search' },
       { label: 'My Orders', path: '/customer/orders' },
     ],
     showCart: true,

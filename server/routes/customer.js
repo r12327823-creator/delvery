@@ -79,32 +79,71 @@ router.get('/vendors/:id', async (req, res) => {
   }
 });
 
-// Search products
+// Search products (enhanced - no stock constraints, better matching)
 router.get('/search', async (req, res) => {
   try {
-    const { q, pincode } = req.query;
-    if (!q) return res.json({ products: [] });
+    const { q, pincode, category } = req.query;
+    if (!q && !category) return res.json({ products: [] });
 
     let query = `
-      SELECT p.*, v.shop_name, v.id as vendor_id
+      SELECT p.*, v.shop_name, v.id as vendor_id, v.shop_address, v.category as vendor_category,
+             u.pincode as vendor_pincode
       FROM products p
       JOIN vendors v ON p.vendor_id = v.id
       JOIN users u ON v.user_id = u.id
       WHERE p.is_active = true AND v.status = 'approved'
-      AND (p.name ILIKE $1 OR v.shop_name ILIKE $1)
     `;
-    const params = [`%${q}%`];
+    const params = [];
+
+    if (q) {
+      params.push(`%${q}%`);
+      query += ` AND (p.name ILIKE $${params.length} OR p.description ILIKE $${params.length} OR p.category ILIKE $${params.length} OR v.shop_name ILIKE $${params.length})`;
+    }
+
+    if (category) {
+      params.push(category);
+      query += ` AND (p.category ILIKE $${params.length} OR v.category ILIKE $${params.length})`;
+    }
 
     if (pincode) {
       params.push(pincode);
       query += ` AND u.pincode = $${params.length}`;
     }
 
-    query += ' ORDER BY p.name LIMIT 50';
+    query += ' ORDER BY p.name LIMIT 100';
     const result = await pool.query(query, params);
     res.json({ products: result.rows });
   } catch (err) {
+    console.error('Search error:', err);
     res.status(500).json({ error: 'Search failed' });
+  }
+});
+
+// Get popular/trending products for homepage
+router.get('/popular', async (req, res) => {
+  try {
+    const { pincode } = req.query;
+    let query = `
+      SELECT p.*, v.shop_name, v.id as vendor_id, v.shop_address, v.category as vendor_category,
+             u.pincode as vendor_pincode
+      FROM products p
+      JOIN vendors v ON p.vendor_id = v.id
+      JOIN users u ON v.user_id = u.id
+      WHERE p.is_active = true AND v.status = 'approved'
+    `;
+    const params = [];
+
+    if (pincode) {
+      params.push(pincode);
+      query += ` AND u.pincode = $${params.length}`;
+    }
+
+    query += ' ORDER BY p.created_at DESC LIMIT 30';
+    const result = await pool.query(query, params);
+    res.json({ products: result.rows });
+  } catch (err) {
+    console.error('Popular products error:', err);
+    res.status(500).json({ error: 'Failed to fetch popular products' });
   }
 });
 
